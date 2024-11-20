@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Etudiants {
+  id         String   @id @default(cuid())
+  matricule  String   @unique
+  nom        String
+  prenom     String
+  adresse    String?
+  photo      String?
+  num_CIN    String   @unique
+  telephone  String
+  email      String   @unique
+
+  @@map("etudiants")
+}
+
+
+model User {
+  id             String    @id
+  username       String    @unique
+  displayName    String
+  email          String?   @unique
+  passwordHash   String
+  googleId       String?   @unique
+  profilePicture String?
+  bio            String?
+  session        Session[]
+  posts          Post[]
+  createdAt      DateTime  @default(now())
+  following        Follow[] @relation("Following")
+  followers        Follow[] @relation("Followers")
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Follow {
+  followerId  String
+  follower    User   @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User   @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  content   String    @db.Text
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hashtag   Hashtag[]
+  createdAt DateTime  @default(now())
+
+  @@map("posts")
+}
+
+model Hashtag {
+  id      String @id @default(cuid())
+  hashtag String
+  post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId  String // Clé étrangère vers Post
+
+  @@map("hashtag")
+}
