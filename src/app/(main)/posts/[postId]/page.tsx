@@ -31,7 +31,7 @@ const getPost = cache(async (postId: string, loggedInUserId: string) => {
 //export async function generateMetadata({params: {postId}}: PageProps) {
 //const {user} = await validateRequest();
 export async function generateMetadata({ params }: PageProps) {
-  const { postId } = await params; // Désestructurer postId correctement ici
+  const { postId } = params; // No need for await here
   const { user } = await validateRequest();
 
   if (!user) return {};
@@ -43,8 +43,49 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-export default async function Page({ params }: PageProps) {
-  const { postId } = await params; // Désestructurer postId correctement ici
+/* export async function generateMetadata({ params }: PageProps) {
+  const { postId } = params; // Désestructurer postId correctement ici
+  const { user } = await validateRequest();
+
+  if (!user) return {};
+
+  const post = await getPost(postId, user.id);
+
+  return {
+    title: `${post.user.displayName}: ${post.content.slice(0, 50)}...`,
+  };
+} */
+
+  export default async function Page({ params }: PageProps) {
+    const { postId } = params; // No need for await
+    const { user } = await validateRequest();
+  
+    if (!user) {
+      return (
+        <p className="text-destructive">
+          You&apos;re not authorized to view this page.
+        </p>
+      );
+    }
+  
+    const post = await getPost(postId, user.id);
+  
+    return (
+      <main className="flex w-full min-w-0 gap-4">
+        <div className="w-full min-w-0 space-y-5">
+          <Post post={post} />
+        </div>
+        <div className="sticky top-[7rem] hidden lg:block h-fit w-72 flex-none">
+          <Suspense fallback={<Loader2 className="mx-auto animate-spin" />}>
+            <UserInfoSidebar user={post.user} />
+          </Suspense>
+        </div>
+      </main>
+    );
+  }
+  
+/* export default async function Page({ params }: PageProps) {
+  const { postId } =  params; // Désestructurer postId correctement ici
   const { user } = await validateRequest();
 
   if (!user) {
@@ -69,7 +110,9 @@ export default async function Page({ params }: PageProps) {
       </div>
     </main>
   );
-}
+} */
+
+
 
 interface UserInfoSidebarProps {
     user: UserData;
