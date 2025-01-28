@@ -11,9 +11,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache, Suspense } from "react";
 
-interface PageProps {
+/* interface PageProps {
   params: { postId: string };
 }
+ */
+import { FC } from "react";
+
+  interface PageProps {
+    params: {
+      postId: string;
+    };
+  }
 
 const getPost = cache(async (postId: string, loggedInUserId: string) => {
   const post = await prisma.post.findUnique({
@@ -56,7 +64,34 @@ export async function generateMetadata({ params }: PageProps) {
   };
 } */
 
-  export default async function Page({ params }: PageProps) {
+  const Page: FC<PageProps> = async ({ params }) => {
+    const { postId } = params;
+    const { user } = await validateRequest();
+  
+    if (!user) {
+      return <p className="text-destructive">You are not authorized to view this page.</p>;
+    }
+  
+    const post = await getPost(postId, user.id);
+  
+    return (
+      <main className="flex w-full min-w-0 gap-4">
+        <div className="w-full min-w-0 space-y-5">
+          <Post post={post} />
+        </div>
+        <div className="sticky top-[7rem] hidden lg:block h-fit w-72 flex-none">
+          <Suspense fallback={<Loader2 className="mx-auto animate-spin" />}>
+            <UserInfoSidebar user={post.user} />
+          </Suspense>
+        </div>
+      </main>
+    );
+  };
+  
+  export default Page;
+  
+
+  /* export default async function Page({ params }: PageProps) {
     const { postId } = params; // No need for await
     const { user } = await validateRequest();
   
@@ -82,7 +117,7 @@ export async function generateMetadata({ params }: PageProps) {
         </div>
       </main>
     );
-  }
+  } */
   
 /* export default async function Page({ params }: PageProps) {
   const { postId } =  params; // Désestructurer postId correctement ici
