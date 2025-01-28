@@ -2,19 +2,19 @@ import Image from "next/image"
 import avatarPlaceholder from "@/assets/avatar-placeholder.png"
 import { cn } from "@/lib/utils"
 interface UserAvatarProps {
-    avatarUrl : string | null | undefined
+    profilePicture : string | null | undefined
     size?: number
     className?: string
 }
 
 export default function UserAvatar({
-    avatarUrl,
+    profilePicture,
     size,
     className
 }: UserAvatarProps) {
     return (
     <Image
-    src={avatarUrl || avatarPlaceholder}
+    src={profilePicture || avatarPlaceholder}
     alt="User avatar"
     width={size ?? 48}
     height={size ?? 48}

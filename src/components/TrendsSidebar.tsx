@@ -53,7 +53,7 @@ async function WhoToFollow() {
             href={"/users/${user.username}"}
             className="flex items-center gap-3"
           >
-            <UserAvatar avatarUrl={user.profilePicture} className="flex-none" />
+            <UserAvatar profilePicture={user.profilePicture} className="flex-none" />
             <div>
               <p className="line-clamp-1 break-all font-semibold hover:underline">
                 {user.displayName}

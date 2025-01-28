@@ -1,5 +1,9 @@
 "use client"
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+
 // Inspired by react-hot-toast library
 import * as React from "react"
 
@@ -32,7 +36,7 @@ function genId() {
   return count.toString()
 }
 
-type ActionType = typeof actionTypes
+type ActionType = typeof actionTypes;
 
 type Action =
   | {

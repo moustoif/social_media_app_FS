@@ -93,7 +93,7 @@ async function UserProfile({ user, loggedInUserid }: UserProfileProps) {
   return (
     <div className="h-fit w-full space-y-5 rounded-2xl bg-card p-5 shadow-sm">
       <UserAvatar
-        avatarUrl={user.profilePicture}
+        profilePicture={user.profilePicture}
         size={250}
         className="mx-auto size-full max-h-60 max-w-60 rounded-full"
       />

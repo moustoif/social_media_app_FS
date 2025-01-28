@@ -25,10 +25,11 @@ export function useUpdateProfileMutation() {
       values,
       avatar,
     }: {
-      values: UpdateUserProfileValues;
-      avatar?: File;
+      values: UpdateUserProfileValues,
+      avatar?: File 
     }) => {
       return Promise.all([
+
         updateUserProfile(values),
         avatar && startAvatarUpload([avatar]),
       ]);
@@ -57,7 +58,7 @@ export function useUpdateProfileMutation() {
                     ...post,
                     user: {
                       ...updatedUser,
-                      avatarUrl: newProfilePicture || updatedUser.profilePicture,
+                      avatar : newProfilePicture || updatedUser.profilePicture,
                     },
                   };
                 }

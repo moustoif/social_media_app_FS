@@ -11,6 +11,8 @@ export const lucia = new Lucia(adapter, {
         expires: false,
         attributes: {
             secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            path:"/",
         },
     },
     getUserAttributes(databaseUserAttributes) {
@@ -19,7 +21,6 @@ export const lucia = new Lucia(adapter, {
             username: databaseUserAttributes.username,
             displayName: databaseUserAttributes.displayName,
             profilePicture: databaseUserAttributes.profilePicture,
-            googleId: databaseUserAttributes.googleId,
         }
     },
 });
@@ -36,8 +37,7 @@ interface DatabaseUserAttributes {
     username : string,
     displayName : string,
     profilePicture : string|null,
-    googleId: string|null,
-}
+    }
 
 export const validateRequest = cache(
     async (): Promise<
@@ -51,9 +51,7 @@ export const validateRequest = cache(
                 session: null
             }
         }
-
         const result = await lucia.validateSession(sessionId);
-
         try {
             if (result.session && result.session.fresh) {
                 const sessionCookie = lucia.createSessionCookie(result.session.id);
@@ -63,14 +61,27 @@ export const validateRequest = cache(
                     sessionCookie.attributes
                 )
             }
-            if(!result.session) {
+            if (!result.session) {
+                const blankCookie = lucia.createBlankSessionCookie();
+                (await cookies()).set(
+                    blankCookie.name,
+                    blankCookie.value,
+                    blankCookie.attributes
+                );
+                return {
+                    user: null,
+                    session: null
+                };
+            }
+            
+            /* if(!result.session) {
                 const sessionCookie = lucia.createBlankSessionCookie();
                 (await cookies()).set(
                     sessionCookie.name,
                     sessionCookie.value,
                     sessionCookie.attributes,
                 );
-            }
+            } */
         } catch {}
 
         return result;

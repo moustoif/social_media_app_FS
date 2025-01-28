@@ -2,9 +2,13 @@ import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 import { FollowerInfo } from "@/lib/types";
 
-export async function GET(req: Request, 
-    { params: {userId}} : {params:{userId: string}},
-) {
+export async function GET(req: Request, props: {params: Promise<{userId: string}>}) {
+    const params = await props.params;
+
+    const {
+        userId
+    } = params;
+
     try {
         const { user : loggedInUser } = await validateRequest();
         if (!loggedInUser) {
@@ -47,10 +51,13 @@ export async function GET(req: Request,
     }
 }
 
-export async function POST(
-    req: Request, 
-    { params: {userId}} : {params:{userId: string}}
-) {
+export async function POST(req: Request, props: {params: Promise<{userId: string}>}) {
+    const params = await props.params;
+
+    const {
+        userId
+    } = params;
+
     try {
 
         const { user : loggedInUser } = await validateRequest();
@@ -58,21 +65,31 @@ export async function POST(
             return Response.json({ error: "Unauthorized"}, { status: 401});
         }
 
-        await prisma.follow.upsert({
-            where: {
-                followerId_followingId : {
-                    followerId : loggedInUser.id,
-                    followingId: userId,
+        await prisma.$transaction([
+            prisma.follow.upsert({
+                where: {
+                    followerId_followingId : {
+                        followerId : loggedInUser.id,
+                        followingId: userId,
+                    },
                 },
-            },
-             create: {
-                    followerId: loggedInUser.id,
-                    followingId : userId,
+                 create: {
+                        followerId: loggedInUser.id,
+                        followingId : userId,
+                    },
+                update : {
+    
                 },
-            update : {
+            }),
+            prisma.notification.create({
+                data: {
+                    issuerId: loggedInUser.id,
+                    recipientId: userId,
+                    type: "FOLLOW",
+                },
+            }),
+        ]);
 
-            },
-        });
 
         return  Response.json({ success: true });
         
@@ -82,9 +99,13 @@ export async function POST(
     }
 }
 
-export async function DELETE(req: Request, 
-    { params: {userId}} : {params:{userId: string}}
-) {
+export async function DELETE(req: Request, props: {params: Promise<{userId: string}>}) {
+    const params = await props.params;
+
+    const {
+        userId
+    } = params;
+
     try {
 
         const { user : loggedInUser } = await validateRequest();
@@ -92,12 +113,22 @@ export async function DELETE(req: Request,
             return Response.json({ error: "Unauthorized"}, { status: 401});
         }
 
-        await prisma.follow.deleteMany({
-            where : {
-                followerId : loggedInUser.id,
-                followingId: userId,
-            }
-        })
+        await prisma.$transaction([
+            prisma.follow.deleteMany({
+                where : {
+                    followerId : loggedInUser.id,
+                    followingId: userId,
+                },
+            }),
+            prisma.notification.deleteMany({
+                where: {
+                    issuerId: loggedInUser.id,
+                    recipientId: userId,
+                    type: "FOLLOW",
+                },
+            }),
+        ]);
+
         
         return new Response();
     } catch (error) {

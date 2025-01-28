@@ -12,7 +12,7 @@ export function useSubmitPostMutation() {
     const {user} = useSession();
 
     const mutation = useMutation({
-        mutationFn: async (input: string) => {
+        mutationFn: async (input: { content: string; mediaIds: string[] }) => {
             return await submitPost(input);
         },
         onSuccess: async (newPost) => {
