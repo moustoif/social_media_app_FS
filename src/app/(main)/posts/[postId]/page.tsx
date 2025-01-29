@@ -24,17 +24,15 @@ const getPost = cache(async (postId: string, loggedInUserId: string) => {
   return post;
 });
 
-interface PageProps {
-  params: {
-    postId: string;
-  };
+interface ParamsProps {
+  postId: string;
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: { params: ParamsProps }) {
   const { user } = await validateRequest();
-
+  
   if (!user) return {};
-
+  
   const post = await getPost(params.postId, user.id);
 
   return {
@@ -42,7 +40,7 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params }: { params: ParamsProps }) {
   const { user } = await validateRequest();
 
   if (!user) {
