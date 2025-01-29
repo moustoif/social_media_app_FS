@@ -24,21 +24,25 @@ const getPost = cache(async (postId: string, loggedInUserId: string) => {
   return post;
 });
 
-export async function generateMetadata({ params }: { params: { postId: string } }) {
-  const { postId } = params;
+interface PageProps {
+  params: {
+    postId: string;
+  };
+}
+
+export async function generateMetadata({ params }: PageProps) {
   const { user } = await validateRequest();
 
   if (!user) return {};
 
-  const post = await getPost(postId, user.id);
+  const post = await getPost(params.postId, user.id);
 
   return {
     title: `${post.user.displayName}: ${post.content.slice(0, 50)}...`,
   };
 }
 
-export default async function Page({ params }: { params: { postId: string } }) {
-  const { postId } = params;
+export default async function Page({ params }: PageProps) {
   const { user } = await validateRequest();
 
   if (!user) {
@@ -49,7 +53,7 @@ export default async function Page({ params }: { params: { postId: string } }) {
     );
   }
 
-  const post = await getPost(postId, user.id);
+  const post = await getPost(params.postId, user.id);
 
   return (
     <main className="flex w-full min-w-0 gap-4">
@@ -102,7 +106,6 @@ async function UserInfoSidebar({ user }: UserInfoSidebarProps) {
     </div>
   );
 }
-
 
 
 
